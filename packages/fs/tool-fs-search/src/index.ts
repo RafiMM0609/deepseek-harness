@@ -31,12 +31,16 @@ import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import { MAX_TIMER_DELAY_MS } from '@deepseek-ai/dsh-timeout'
 import { GLOB_MAX_RESULTS, applyGlobTool } from './glob.ts'
+import { FIND_MAX_RESULTS, applyFindTool } from './find.ts'
 import { GREP_MAX_LINE_BYTES, GREP_MAX_MATCHES, applyGrepTool } from './grep.ts'
 import { RAW_OUTPUT_MAX_BYTES, SEARCH_GRACE_MS, SEARCH_META_MAX_BYTES, SEARCH_STDERR_MAX_BYTES, SEARCH_TIMEOUT_MS } from './search-core.ts'
 
 export { GLOB_MAX_RESULTS, GLOB_VCS_EXCLUDES, applyGlobTool, buildGlobCommand, formatGlobOutput, parseGlobArgs, presentGlobCall, presentGlobResult, sampleAcrossTopLevel } from './glob.ts'
 export type { GlobInput, GlobSample, GlobToolCaps } from './glob.ts'
+export { FIND_MAX_RESULTS, applyFindTool, buildFindCommand, formatFindOutput, parseFindArgs } from './find.ts'
+export type { FindInput, FindToolCaps } from './find.ts'
 export {
+  GREP_MAX_CONTEXT,
   GREP_MAX_LINE_BYTES,
   GREP_MAX_MATCHES,
   applyGrepTool,
@@ -48,7 +52,7 @@ export {
   presentGrepCall,
   presentGrepResult,
 } from './grep.ts'
-export type { GrepInput, GrepToolCaps } from './grep.ts'
+export type { GrepInput, GrepRecord, GrepToolCaps } from './grep.ts'
 export {
   RAW_OUTPUT_MAX_BYTES,
   SEARCH_GRACE_MS,
@@ -74,6 +78,10 @@ export const inject = ['tools', 'systemPrompt', 'subprocess', 'workingDirectory'
 export interface Config {
   /** Whether an over-cap `glob` page is sampled across top-level entries instead of taking the modification-time head. */
   sampleOverCapGlobResults: boolean
+  /** Register the `glob` tool. Defaults to true. */
+  glob?: boolean
+  /** Register the Pi-compatible `find` tool. Defaults to false. */
+  find?: boolean
   /** Max paths one `glob` call retains inline; later paths go to the formatted spill file. */
   globMaxResults?: number
   /** Max flat matches one `grep` call retains inline; later matches go to the formatted spill file. */
@@ -97,6 +105,8 @@ export interface Config {
 
 export const Config: z<Config> = z.object({
   sampleOverCapGlobResults: z.boolean().required(),
+  glob: z.boolean().default(true),
+  find: z.boolean().default(false),
   globMaxResults: z.number().default(GLOB_MAX_RESULTS),
   grepMaxMatches: z.number().default(GREP_MAX_MATCHES),
   grepMaxLineBytes: z.number().default(GREP_MAX_LINE_BYTES),
@@ -140,22 +150,29 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
   }
   assertPositiveInteger('stderrMaxBytes', resolved.stderrMaxBytes)
   assertPositiveInteger('timeoutMs', resolved.timeoutMs)
-  applyGlobTool(ctx, {
-    sampleOverCapGlobResults: resolved.sampleOverCapGlobResults,
-    maxResults: resolved.globMaxResults,
+  const searchCaps = {
     maxMetaBytes: resolved.searchMetaMaxBytes,
     rawOutputMaxBytes: resolved.rawOutputMaxBytes,
     graceMs: resolved.graceMs,
     stderrMaxBytes: resolved.stderrMaxBytes,
     timeoutMs: resolved.timeoutMs,
-  })
+  }
+  if (resolved.glob) {
+    applyGlobTool(ctx, {
+      sampleOverCapGlobResults: resolved.sampleOverCapGlobResults,
+      maxResults: resolved.globMaxResults,
+      ...searchCaps,
+    })
+  }
+  if (resolved.find) {
+    applyFindTool(ctx, {
+      maxResults: FIND_MAX_RESULTS,
+      ...searchCaps,
+    })
+  }
   applyGrepTool(ctx, {
     maxMatches: resolved.grepMaxMatches,
     maxLineBytes: resolved.grepMaxLineBytes,
-    maxMetaBytes: resolved.searchMetaMaxBytes,
-    rawOutputMaxBytes: resolved.rawOutputMaxBytes,
-    graceMs: resolved.graceMs,
-    stderrMaxBytes: resolved.stderrMaxBytes,
-    timeoutMs: resolved.timeoutMs,
+    ...searchCaps,
   })
 }

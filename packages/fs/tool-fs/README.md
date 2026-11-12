@@ -48,14 +48,14 @@ The policy plugin is optional: without it the tools run against the bare provide
 | `read` | `file_path`, `offset?`, `limit?` | Line-numbered UTF-8 content with a pagination footer; `offset` is 1-based and `limit` defaults to and caps at the configured `readLimit` |
 | `read_image` | `file_path` | Reads and persists a PNG/JPEG/WebP/GIF source; an extension-less path (normalized attachment object paths included) is identified from its file signature; normalization can downscale it before the next model request, so the model need not create a thumbnail first |
 | `write` | `file_path`, `content` | Creates or fully replaces a file; with the policy plugin, overwriting requires a prior `read` at the unchanged version, creating does not |
-| `edit` | `file_path`, `old_string`, `new_string`, `replace_all?` | Literal replacement requiring a unique match unless `replace_all` is true; with the policy plugin, requires a prior `read` and an unchanged file |
+| `edit` | `file_path`, `old_string`, `new_string`, `replace_all?` | Literal replacement requiring a unique match unless `replace_all` is true; with the policy plugin, requires a prior `read` and an unchanged file. With `editStyle: pi`, accepts `path` and `edits` (each `oldText`/`newText`) and applies all replacements in one unique, non-overlapping batch |
 | `apply_patch` | `input`, sandbox escalation fields when available | Add/update/delete/move with whole-patch admission and known partial effects |
 
 Field names are snake_case to match Claude Code and existing harness tool schemas. The `write` and `edit` path descriptions ask the model to emit `file_path` before the content or replacement strings; this guides streaming presentation but does not enforce JSON member order. Successes return compact envelopes — a read window, an image reference, or a `Created file`/`Updated file` confirmation — and `write`/`edit` derive replayable diff-card metadata for UI presentation.
 
 ### Configuration
 
-All keys are optional. The `read`, `readImage`, `write`, and `edit` switches default to `true`; set a switch to `false` to omit that tool and its guidance. `applyPatch` defaults to `false`; [`dsh-base`](../../bundle/base/cordis.patch.yml) and the Web `standard` preset enable it on their `tool-fs` rows, while the Web `ptc` and `cordis` presets state `applyPatch: false`, and changing that one line adds or drops the tool beside `edit`. All five tools may be disabled. Enabling `readImage` still requires an attachment store and an image-capable model. Read caps remain validated when `read` is disabled.
+All keys are optional. The `read`, `readImage`, `write`, and `edit` switches default to `true`; set a switch to `false` to omit that tool and its guidance. `editStyle` defaults to `dsh`; `pi` registers the same `edit` tool name with Pi's multi-edit schema and applies every `edits[]` entry against the original file in one atomic write. `applyPatch` defaults to `false`; [`dsh-base`](../../bundle/base/cordis.patch.yml) and the Web `standard` preset enable it on their `tool-fs` rows, while the Web `ptc` and `cordis` presets state `applyPatch: false`, and changing that one line adds or drops the tool beside `edit`. All five tools may be disabled. Enabling `readImage` still requires an attachment store and an image-capable model. Read caps remain validated when `read` is disabled.
 
 | Key | Default | Meaning |
 |---|---|---|
@@ -63,6 +63,7 @@ All keys are optional. The `read`, `readImage`, `write`, and `edit` switches def
 | `readImage` | `true` | Register `read_image` while an attachment store is mounted |
 | `write` | `true` | Register `write` and its guidance |
 | `edit` | `true` | Register `edit` and its guidance |
+| `editStyle` | `dsh` | `dsh` registers `file_path`/`old_string`/`new_string`; `pi` registers `path`/`edits[]` (each `oldText`/`newText`) |
 | `applyPatch` | `false` | Register `apply_patch` and its guidance |
 | `readLimit` | `2000` | Default and maximum lines returned by one `read` call |
 | `readMaxLineLength` | `2000` | Characters kept per line before truncation |
@@ -113,6 +114,7 @@ The tools are the executor; policy is an event gate. The tools inject no policy 
 | [`src/apply-patch.ts`](src/apply-patch.ts), [`apply-patch-output.ts`](src/apply-patch-output.ts) | `apply_patch` registration, strict commit values and compact diagnostics |
 | [`src/apply-patch-presentation.ts`](src/apply-patch-presentation.ts) | Pure call previews and known result diffs |
 | [`src/edit.ts`](src/edit.ts) | `edit` executor: intent waterfall, literal edit, observation |
+| [`src/edit-pi.ts`](src/edit-pi.ts) | Pi-style `edit` executor: multi-edit validation and one atomic write |
 | [`src/patch/index.ts`](src/patch/index.ts), [`types.ts`](src/patch/types.ts) | Internal `executePatch` entry and serializable per-operation reports |
 | [`src/patch/plan.ts`](src/patch/plan.ts) | Parse and resolve Session-relative paths; preserve ordered operations sharing a canonical target |
 | [`src/patch/preflight.ts`](src/patch/preflight.ts) | Simulate preceding successes and collect observation, type, text, and hunk failures before any write |

@@ -7,6 +7,7 @@ export type BuiltInPresetCopyKey =
   | 'presetPtcName' | 'presetPtcDescription'
   | 'presetMinimalName' | 'presetMinimalDescription'
   | 'presetCordisName' | 'presetCordisDescription'
+  | 'presetPiName' | 'presetPiDescription'
 
 /** Preset roster fields needed to resolve display copy. */
 export interface PresetDisplaySource {

@@ -13,6 +13,7 @@ import { applyReadTool, READ_LIMIT, STREAM_MIN_SIZE } from './read.ts'
 import { applyWriteTool } from './write.ts'
 import { applyApplyPatchTool } from './apply-patch.ts'
 import { applyEditTool } from './edit.ts'
+import { applyPiEditTool } from './edit-pi.ts'
 import { applyReadImageTool } from './read-image.ts'
 import { READ_MAX_BYTES, READ_MAX_LINE_LENGTH } from './read-render.ts'
 import { FsSandboxController } from './sandbox.ts'
@@ -33,6 +34,8 @@ export interface Config {
   write?: boolean
   /** Register `edit` and its guidance. Defaults to true. */
   edit?: boolean
+  /** Which `edit` schema to register: the DSH single-replacement tool or Pi's multi-edit tool. Defaults to `dsh`. */
+  editStyle?: 'dsh' | 'pi'
   /** Register `apply_patch` and its guidance beside `edit`. Defaults to false; shipped compositions set it on their `tool-fs` rows. */
   applyPatch?: boolean
   /** Default and maximum number of lines returned by one `read` call. */
@@ -50,6 +53,7 @@ export const Config: z<Config> = z.object({
   readImage: z.boolean().default(true),
   write: z.boolean().default(true),
   edit: z.boolean().default(true),
+  editStyle: z.union([z.const('dsh'), z.const('pi')]).default('dsh'),
   applyPatch: z.boolean().default(false),
   readLimit: z.number().default(READ_LIMIT),
   readMaxLineLength: z.number().default(READ_MAX_LINE_LENGTH),
@@ -97,7 +101,10 @@ export function apply(ctx: Context, config: Config): void {
   if (resolved.write || resolved.edit || resolved.applyPatch) {
     const sandbox = new FsSandboxController(ctx)
     if (resolved.write) applyWriteTool(ctx, sandbox)
-    if (resolved.edit) applyEditTool(ctx, sandbox)
+    if (resolved.edit) {
+      if (resolved.editStyle === 'pi') applyPiEditTool(ctx, sandbox)
+      else applyEditTool(ctx, sandbox)
+    }
     if (resolved.applyPatch) applyApplyPatchTool(ctx, sandbox)
   }
 }

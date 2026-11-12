@@ -48,14 +48,14 @@ kind: "package-reference"
 | `read` | `file_path`、`offset?`、`limit?` | 带行号的 UTF-8 内容与分页 footer；`offset` 从 1 开始，`limit` 默认为配置的 `readLimit`，上限也为该值 |
 | `read_image` | `file_path` | 读取并持久保存 PNG/JPEG/WebP/GIF 源图；无扩展名路径（包括规范化附件对象路径）按文件签名识别格式；规范化可在下一次模型请求前缩小图片，因此模型无需先创建缩略图 |
 | `write` | `file_path`、`content` | 创建或完整替换文件；有策略插件时，覆盖要求先在未变版本上执行 `read`，创建不需要 |
-| `edit` | `file_path`、`old_string`、`new_string`、`replace_all?` | 字面量替换，除非 `replace_all` 为 true 否则要求唯一匹配；有策略插件时，要求先执行 `read` 且文件未变 |
+| `edit` | `file_path`、`old_string`、`new_string`、`replace_all?` | 字面量替换，除非 `replace_all` 为 true 否则要求唯一匹配；有策略插件时，要求先执行 `read` 且文件未变。使用 `editStyle: pi` 时接受 `path` 与 `edits`（每项含 `oldText`/`newText`），一次调用内批量应用所有唯一且不重叠的替换 |
 | `apply_patch` | `input`，以及可用时的沙箱提权字段 | 新增/更新/删除/移动，整份预检后顺序执行并保留已知部分效果 |
 
 字段名使用 snake_case，与 Claude Code 和现有 harness 工具 schema 一致。`write` 和 `edit` 的路径描述要求模型先输出 `file_path`，再输出内容或替换字符串；这用于引导流式展示，不强制 JSON 成员顺序。成功返回紧凑信封——读取窗口、图像引用或 `Created file`/`Updated file` 确认——`write`/`edit` 还会派生可回放的 diff 卡片元数据供 UI 展示。
 
 ### 配置
 
-所有键均为可选。`read`、`readImage`、`write` 和 `edit` 开关默认为 `true`；将开关设为 `false` 可省略对应工具及其指导文本。`applyPatch` 默认为 `false`；[`dsh-base`](../../bundle/base/cordis.patch.yml) 与 Web 的 `standard` preset 在各自的 `tool-fs` 行上开启它，而 Web 的 `ptc`、`cordis` preset 显式写出 `applyPatch: false`，改这一行即可在 `edit` 旁加入或去掉该工具。允许关闭全部五个工具。启用 `readImage` 仍需要附件存储和支持图片输入的模型。关闭 `read` 时仍会校验读取上限。
+所有键均为可选。`read`、`readImage`、`write` 和 `edit` 开关默认为 `true`；将开关设为 `false` 可省略对应工具及其指导文本。`editStyle` 默认为 `dsh`；`pi` 使用相同的 `edit` 工具名注册 Pi 的多编辑 schema，并将所有 `edits[]` 项按原文件匹配后一次性原子写入。`applyPatch` 默认为 `false`；[`dsh-base`](../../bundle/base/cordis.patch.yml) 与 Web 的 `standard` preset 在各自的 `tool-fs` 行上开启它，而 Web 的 `ptc`、`cordis` preset 显式写出 `applyPatch: false`，改这一行即可在 `edit` 旁加入或去掉该工具。允许关闭全部五个工具。启用 `readImage` 仍需要附件存储和支持图片输入的模型。关闭 `read` 时仍会校验读取上限。
 
 | 键 | 默认值 | 含义 |
 |---|---|---|
@@ -63,6 +63,7 @@ kind: "package-reference"
 | `readImage` | `true` | 附件存储挂载时注册 `read_image` |
 | `write` | `true` | 注册 `write` 及其指导文本 |
 | `edit` | `true` | 注册 `edit` 及其指导文本 |
+| `editStyle` | `dsh` | `dsh` 注册 `file_path`/`old_string`/`new_string`；`pi` 注册 `path`/`edits[]`（每项含 `oldText`/`newText`） |
 | `applyPatch` | `false` | 注册 `apply_patch` 及其提示 |
 | `readLimit` | `2000` | 一次 `read` 调用返回的默认和最大行数 |
 | `readMaxLineLength` | `2000` | 每行截断前保留的字符数 |
@@ -113,6 +114,7 @@ kind: "package-reference"
 | [`src/apply-patch.ts`](src/apply-patch.ts)、[`apply-patch-output.ts`](src/apply-patch-output.ts) | `apply_patch` 注册、严格提交值与精简诊断 |
 | [`src/apply-patch-presentation.ts`](src/apply-patch-presentation.ts) | 纯调用预览与已知结果 diff |
 | [`src/edit.ts`](src/edit.ts) | `edit` 执行器：意图 waterfall、字面量编辑、观察 |
+| [`src/edit-pi.ts`](src/edit-pi.ts) | Pi 风格 `edit` 执行器：多编辑校验与一次原子写入 |
 | [`src/patch/index.ts`](src/patch/index.ts)、[`types.ts`](src/patch/types.ts) | 内部 `executePatch` 入口与可序列化的逐操作报告 |
 | [`src/patch/plan.ts`](src/patch/plan.ts) | 解析补丁并按 Session 工作目录解析路径；保留共享规范化目标的有序操作 |
 | [`src/patch/preflight.ts`](src/patch/preflight.ts) | 模拟前序成功操作，在任何写入前收集观察、类型、文本与 hunk 失败 |

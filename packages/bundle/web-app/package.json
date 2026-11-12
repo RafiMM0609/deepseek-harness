@@ -39,6 +39,7 @@
     "presets/ptc.patch.yml",
     "presets/minimal.patch.yml",
     "presets/cordis.patch.yml",
+    "presets/pi.patch.yml",
     "lib/public-url-*.js",
     "lib/types/**/*.d.ts",
     "lib/types/**/*.d.ts.map",
@@ -53,7 +54,8 @@
         "./presets/standard.patch.yml",
         "./presets/ptc.patch.yml",
         "./presets/minimal.patch.yml",
-        "./presets/cordis.patch.yml"
+        "./presets/cordis.patch.yml",
+        "./presets/pi.patch.yml"
       ]
     }
   },
