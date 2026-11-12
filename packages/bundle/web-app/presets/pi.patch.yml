@@ -1,0 +1,91 @@
+# Agent preset pi: a lean, Pi-style composition.
+#
+# Pi's harness exposes read, write, multi-edit, bash, find, and grep, loads
+# AGENTS.md and skills, and compacts long histories; it ships no plan mode,
+# subagents, todo, goals, web search, or Office tools. This preset mirrors that
+# shape while using DSH's own implementations: `tool-fs` takes Pi's multi-edit
+# schema, and `tool-fs-search` enables Pi's `find` while leaving DSH's `glob`
+# off.
+#
+# Edits saved from the Web editor override this row's `config.plugins` by id
+# from the active profile patch.
+- insert:
+    - id: preset-pi
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: pi
+        order: 5
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: >-
+                You are a coding assistant running inside pi, a coding agent
+                harness. Help users inspect files, run commands, and modify code.
+              suffix: >-
+                Be concise in your responses.
+                Show file paths clearly when working with files.
+
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 65536
+
+          - id: tool-bash
+            name: '@deepseek-ai/dsh-tool-bash'
+            disabled: !!js process.platform === 'win32'
+
+          - id: tool-pwsh
+            name: '@deepseek-ai/dsh-tool-pwsh'
+            disabled: !!js process.platform !== 'win32'
+
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+            config:
+              # Pi has no apply_patch tool; read_image is DSH's equivalent of
+              # Pi's image-aware read. Pi's edit schema carries a list of
+              # replacements in one call, so this preset uses that variant.
+              applyPatch: false
+              readImage: true
+              editStyle: pi
+
+          # Pi's find/grep tools: `find` is Pi's file discovery (respecting
+          # .gitignore), and `grep` carries Pi's optional glob/ignoreCase/
+          # literal/context/limit arguments. `glob` is DSH's equivalent of a
+          # broader find, so it stays off here to keep the tool list Pi-shaped.
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+              glob: false
+              find: true
+
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+            config:
+              # DSH already scans <project>/.agents/skills and
+              # ~/.agents/skills, which Pi also reads. This adds Pi's project
+              # .pi/skills root relative to the directory that launched DSH.
+              customSkillDirs:
+                - !!js process.getBuiltinModule('node:path').resolve('.pi/skills')
+
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024

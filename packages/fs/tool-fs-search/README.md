@@ -1,5 +1,5 @@
 ---
-description: "The model-facing glob and grep discovery tools for users and maintainers composing or debugging workspace search for agents."
+description: "The model-facing glob, find, and grep discovery tools for users and maintainers composing or debugging workspace search for agents."
 kind: "package-reference"
 ---
 
@@ -48,24 +48,27 @@ A subprocess backend, then the tools; the spill backend is optional and makes ca
 | Tool | Arguments | Behavior |
 |---|---|---|
 | `glob` | `pattern`, `path?` | Finds files whose paths match a glob pattern, including hidden and ignored files but excluding VCS metadata; a pattern with no `/` matches basenames at any depth, so `*` matches the whole tree; complete results stay modification-time ordered |
-| `grep` | `pattern`, `path?`, `include?` | Searches file contents with a ripgrep regex and returns matches grouped by file as `Line N: <preview>`; omitted or exact empty `include` applies no file filter; otherwise `include` is one positive glob, with whitespace-only values, comma-separated lists, and negated values rejected up front |
+| `find` | `pattern`, `path?`, `limit?` | Pi-compatible file discovery: includes hidden files, respects `.gitignore`, excludes VCS metadata, and returns at most `limit` paths (default and cap 1000) |
+| `grep` | `pattern`, `path?`, `include?`, `glob?`, `ignoreCase?`, `literal?`, `context?`, `limit?` | Searches file contents with a ripgrep regex and returns matches grouped by file as `Line N: <preview>`; `include`/`glob` filter files, `ignoreCase` and `literal` change matching, `context` adds surrounding lines, and `limit` caps returned matches |
 
 Routine budgets stay out of the model-facing schema: a model that needs surrounding context reads the matched file with `read`, and one that needs later results follows the returned spill locator's retrieval hint.
 
-Both tools opt into concurrent scheduling with sibling parallel-safe calls. A search records no file observation, over-cap spilling runs in the model-ordered post-execute phase, and working-directory recovery is serialized per Session by the working-directory service.
+The tools opt into concurrent scheduling with sibling parallel-safe calls. A search records no file observation, over-cap spilling runs in the model-ordered post-execute phase, and working-directory recovery is serialized per Session by the working-directory service.
 
 ### Configuration
 
-`sampleOverCapGlobResults` is required; the remaining keys are optional search caps with the defaults below.
+`sampleOverCapGlobResults` is required; the remaining keys are optional search caps and tool switches with the defaults below.
 
 | Key | Default | Meaning |
 |---|---|---|
 | `sampleOverCapGlobResults` | none (required) | `true` samples an over-cap `glob` page across top-level entries; `false` keeps the modification-time-ordered head |
+| `glob` | `true` | Register `glob` |
+| `find` | `false` | Register the Pi-compatible `find` tool |
 | `globMaxResults` | `100` | Max paths one `glob` call shows inline |
 | `grepMaxMatches` | `250` | Max flat matches one `grep` call retains inline; later matches go to the formatted spill artifact |
 | `grepMaxLineBytes` | `2000` | Byte cap per matched-line preview, preserving UTF-8 boundaries |
 | `rawOutputMaxBytes` | `20000000` | Max complete raw `rg` stdout a search will parse; larger raw output fails with `SEARCH_RAW_OUTPUT_OVERFLOW` |
-| `timeoutMs` | `30000` | Cooperative tool-call budget on both tools, enforced through `exec.signal` |
+| `timeoutMs` | `30000` | Cooperative tool-call budget on the search tools, enforced through `exec.signal` |
 | `graceMs` | `3000` | Terminate-escalation grace the subprocess seam grants past `timeoutMs` |
 | `stderrMaxBytes` | `65536` | Diagnostic-tail budget for `rg` stderr |
 | `searchMetaMaxBytes` | `65536` | Max bytes of one search's serialized `presentationMeta`; trailing groups/paths drop past it |
@@ -100,6 +103,7 @@ Local workspace discovery is naturally a process-backed `rg` workflow, and putti
 |---|---|
 | [`src/index.ts`](src/index.ts) | Plugin entry: `Config`, tool composition, cap validation |
 | [`src/glob.ts`](src/glob.ts) | `glob` schema, argv, parsing, inline sampling, formatting |
+| [`src/find.ts`](src/find.ts) | Pi-compatible `find` schema, argv, formatting, and registration |
 | [`src/grep.ts`](src/grep.ts) | `grep` schema, argv, `--json` parsing, preview retention, formatting |
 | [`src/search-core.ts`](src/search-core.ts) | Shared spawn helper, `SEARCH_*` errors, spill handoff, workdir-relative display |
 | [`src/presentation.ts`](src/presentation.ts) | Search-card metadata projection |

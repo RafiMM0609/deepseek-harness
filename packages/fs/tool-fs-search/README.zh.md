@@ -1,5 +1,5 @@
 ---
-description: "面向模型的 glob 与 grep 发现工具：供组合或排查 agent（智能体）工作区搜索的用户与维护者使用。"
+description: "面向模型的 glob、find 与 grep 发现工具：供组合或排查 agent（智能体）工作区搜索的用户与维护者使用。"
 kind: "package-reference"
 ---
 
@@ -48,24 +48,27 @@ kind: "package-reference"
 | 工具 | 参数 | 行为 |
 |---|---|---|
 | `glob` | `pattern`、`path?` | 查找路径匹配 glob 模式的文件，包含隐藏与忽略文件但排除 VCS 元数据；不含 `/` 的模式匹配任意深度的基名，因此 `*` 匹配整棵树；完整结果保持按修改时间排序 |
-| `grep` | `pattern`、`path?`、`include?` | 用 ripgrep 正则搜索文件内容，并按文件分组返回 `Line N: <preview>` 匹配；省略 `include` 或传入空字符串时不限制文件类型；否则 `include` 是一个正向 glob 过滤器，仅含空白的值、逗号分隔列表与否定值会被前置拒绝 |
+| `find` | `pattern`、`path?`、`limit?` | Pi 兼容的文件发现：包含隐藏文件、遵循 `.gitignore`、排除 VCS 元数据，最多返回 `limit` 个路径（默认与上限均为 1000） |
+| `grep` | `pattern`、`path?`、`include?`、`glob?`、`ignoreCase?`、`literal?`、`context?`、`limit?` | 用 ripgrep 正则搜索文件内容，并按文件分组返回 `Line N: <preview>` 匹配；`include`/`glob` 过滤文件，`ignoreCase` 与 `literal` 改变匹配方式，`context` 添加上下文行，`limit` 限制返回的匹配数 |
 
 常规预算不进入面向模型的 schema：需要周边上下文的模型用 `read` 读取匹配文件，需要后续结果的模型遵循返回的 spill locator 检索提示。
 
-两个工具都选择与同批并行安全调用并发调度。搜索不记录文件观察，超出上限的 spill 在按模型顺序执行的 post-execute 阶段运行，工作目录恢复由工作目录服务按会话串行化。
+这些工具都选择与同批并行安全调用并发调度。搜索不记录文件观察，超出上限的 spill 在按模型顺序执行的 post-execute 阶段运行，工作目录恢复由工作目录服务按会话串行化。
 
 ### 配置
 
-`sampleOverCapGlobResults` 为必填；其余键是可选的搜索上限，默认值如下。
+`sampleOverCapGlobResults` 为必填；其余键是可选的搜索上限与工具开关，默认值如下。
 
 | 键 | 默认值 | 含义 |
 |---|---|---|
 | `sampleOverCapGlobResults` | 无（必填） | `true` 在顶层条目之间对超过上限的 `glob` 页面采样；`false` 保留按修改时间排序的前部 |
+| `glob` | `true` | 注册 `glob` |
+| `find` | `false` | 注册 Pi 兼容的 `find` 工具 |
 | `globMaxResults` | `100` | 一次 `glob` 调用内联展示的最大路径数 |
 | `grepMaxMatches` | `250` | 一次 `grep` 调用内联保留的最大平铺匹配数；后续匹配写入格式化 spill 产物 |
 | `grepMaxLineBytes` | `2000` | 每条匹配行预览的字节上限，保留 UTF-8 边界 |
 | `rawOutputMaxBytes` | `20000000` | 搜索将解析的完整原始 `rg` stdout 上限；更大的原始输出以 `SEARCH_RAW_OUTPUT_OVERFLOW` 失败 |
-| `timeoutMs` | `30000` | 附加到两个工具的协作式工具调用预算，通过 `exec.signal` 强制执行 |
+| `timeoutMs` | `30000` | 附加到搜索工具的协作式工具调用预算，通过 `exec.signal` 强制执行 |
 | `graceMs` | `3000` | subprocess seam 在 `timeoutMs` 之外授予的终止升级宽限期 |
 | `stderrMaxBytes` | `65536` | `rg` stderr 的诊断尾部预算 |
 | `searchMetaMaxBytes` | `65536` | 一次搜索序列化 `presentationMeta` 的字节上限；超出部分丢弃尾部的组/路径 |
@@ -100,6 +103,7 @@ Node 部署在受支持的 macOS、Linux 与 Windows 目标上获得 `@vscode/ri
 |---|---|
 | [`src/index.ts`](src/index.ts) | 插件入口：`Config`、工具组合、上限校验 |
 | [`src/glob.ts`](src/glob.ts) | `glob` schema、argv、解析、内联采样、格式化 |
+| [`src/find.ts`](src/find.ts) | Pi 兼容的 `find` schema、argv、格式化与注册 |
 | [`src/grep.ts`](src/grep.ts) | `grep` schema、argv、`--json` 解析、预览保留、格式化 |
 | [`src/search-core.ts`](src/search-core.ts) | 共享 spawn 助手、`SEARCH_*` 错误、spill 交接、工作目录相对展示 |
 | [`src/presentation.ts`](src/presentation.ts) | 搜索卡片元数据投影 |

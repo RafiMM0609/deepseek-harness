@@ -278,11 +278,21 @@ export function toWorkdirRelative(path: string, workdir: string): string {
   return rel
 }
 
+/** One context line around a grep match. */
+export interface GrepContextLine {
+  lineNumber: number
+  line: string
+}
+
 /** One parsed match: the file, the 1-based line number, and the (possibly previewed) line text. */
 export interface GrepMatch {
   path: string
   lineNumber: number
   line: string
+  /** Context lines before this match, in file order. */
+  contextBefore?: GrepContextLine[]
+  /** Context lines after this match, in file order. */
+  contextAfter?: GrepContextLine[]
 }
 
 /**
@@ -316,7 +326,16 @@ export function previewLine(line: string, maxBytes: number): string {
  */
 export function retainGrepMatches(matches: GrepMatch[], maxMatches: number, maxLineBytes: number): RetainedItems<GrepMatch> {
   const retainer = new ItemRetainer<GrepMatch>({ kind: 'head', maxItems: maxMatches })
-  for (const match of matches) retainer.push({ ...match, line: previewLine(match.line, maxLineBytes) })
+  for (const match of matches) {
+    const contextBefore = match.contextBefore?.map(line => ({ ...line, line: previewLine(line.line, maxLineBytes) }))
+    const contextAfter = match.contextAfter?.map(line => ({ ...line, line: previewLine(line.line, maxLineBytes) }))
+    retainer.push({
+      ...match,
+      line: previewLine(match.line, maxLineBytes),
+      ...contextBefore === undefined ? {} : { contextBefore },
+      ...contextAfter === undefined ? {} : { contextAfter },
+    })
+  }
   return retainer.finish()
 }
 

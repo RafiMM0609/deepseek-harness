@@ -70,7 +70,7 @@ describe('search tools over the real subprocess service + the packaged rg', () =
     await ctx.plugin(ToolRuntime)
     await ctx.plugin(NativeToolExecutor)
     await ctx.plugin(LocalSubprocessRuntime)
-    await ctx.plugin(ToolFsSearch, { sampleOverCapGlobResults: true })
+    await ctx.plugin(ToolFsSearch, { sampleOverCapGlobResults: true, find: true })
   })
 
   afterEach(async () => {
@@ -257,6 +257,47 @@ describe('search tools over the real subprocess service + the packaged rg', () =
       const result = await call('grep', { pattern: 'x', path: 'no-such-dir' })
       expect(result.isError).toBe(true)
       expect(result.error).toMatchObject({ info: { code: 'SEARCH_FAILED' } })
+    })
+  })
+
+  describe('find', () => {
+    it('respects .gitignore, includes hidden files, and excludes VCS metadata', async () => {
+      await writeFile(join(dir, '.gitignore'), 'ignored.ts\n')
+      await writeFile(join(dir, 'ignored.ts'), '')
+      const result = await call('find', { pattern: '*.ts' }, agent())
+      expect(result.isError).toBe(false)
+      const output = text(result)
+      expect(output).toContain('.hidden.ts')
+      expect(output).toContain(join('src', 'alpha.ts'))
+      expect(output).not.toContain('ignored.ts')
+      expect(output).not.toContain('.git')
+    })
+
+    it('honors the per-call limit', async () => {
+      const result = await call('find', { pattern: '*.ts', limit: 1 }, agent())
+      expect(result.isError).toBe(false)
+      expect(text(result)).toContain('(Showing 1 of')
+    })
+  })
+
+  describe('grep enrichment', () => {
+    it('supports ignoreCase, literal, glob, and context', async () => {
+      const result = await call('grep', {
+        pattern: 'EXPORT', ignoreCase: true, literal: true, glob: '*.ts', path: 'src/alpha.ts', context: 1,
+      }, agent())
+      expect(result.isError).toBe(false)
+      const output = text(result)
+      expect(output).toContain('Found 1 match')
+      expect(output).toContain('Line 1: export const alpha = 1')
+      expect(output).toContain('Line 2- // TODO: refit alpha')
+    })
+
+    it('supports a per-call match limit', async () => {
+      const result = await call('grep', {
+        pattern: 'export', glob: 'src/*.ts', limit: 1,
+      }, agent())
+      expect(result.isError).toBe(false)
+      expect(text(result)).toContain('Found 1 of 2 matches')
     })
   })
 

@@ -12513,6 +12513,9 @@ importers:
       '@deepseek-ai/schemastery':
         specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
+      minimatch:
+        specifier: 10.2.5
+        version: 10.2.5
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: workspace:~

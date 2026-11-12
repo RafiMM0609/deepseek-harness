@@ -43,5 +43,11 @@
       - 'button "模式说明: 创造模式"': 模式说明
       - 'button "如何使用: 创造模式"': 如何使用
       - 'button "查看配置: 创造模式"': 查看配置
+    - listitem:
+      - 'button "设为新任务默认: Pi 模式"':
+        - text: Pi 模式 内置
+        - code: pi
+        - text: 精简的 Pi 风格 Agent：读取、写入、编辑、终端、find、grep、AGENTS.md、技能与上下文压缩，不包含计划模式或子代理。
+      - 'button "查看配置: Pi 模式"': 查看配置
   - heading "自定义" [level=3]
   - button "让 Agent 帮我创建预设模式"

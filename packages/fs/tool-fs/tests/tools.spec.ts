@@ -485,6 +485,34 @@ describe('edit tool', () => {
     expect(text(result)).toBe('The file /abs/a.txt has been updated successfully.')
   })
 
+  it('applies a Pi-style batch against the original file', async () => {
+    const { ctx, fs } = await setup({ editStyle: 'pi' })
+    const session = { header: {} }
+    fs.files.set('key:a.txt', 'alpha\nbeta\ngamma')
+    await call(ctx, 'read', { file_path: 'a.txt' }, { session })
+    const result = await call(ctx, 'edit', {
+      path: 'a.txt',
+      edits: [{ oldText: 'alpha', newText: 'ALPHA' }, { oldText: 'gamma', newText: 'GAMMA' }],
+    }, { session })
+    if (result.isError) throw new Error('expected Pi edit success')
+    expect(fs.files.get('key:a.txt')).toBe('ALPHA\nbeta\nGAMMA')
+    expect(result.value).toEqual({ path: '/abs/a.txt', before: 'alpha\nbeta\ngamma', after: 'ALPHA\nbeta\nGAMMA' })
+    expect(text(result)).toBe('Successfully replaced 2 block(s) in /abs/a.txt.')
+  })
+
+  it('rejects overlapping Pi-style edits without writing', async () => {
+    const { ctx, fs } = await setup({ editStyle: 'pi' })
+    const session = { header: {} }
+    fs.files.set('key:a.txt', 'abcdef')
+    await call(ctx, 'read', { file_path: 'a.txt' }, { session })
+    const result = await call(ctx, 'edit', {
+      path: 'a.txt',
+      edits: [{ oldText: 'abc', newText: 'x' }, { oldText: 'cde', newText: 'y' }],
+    }, { session })
+    expect(result.isError).toBe(true)
+    expect(fs.files.get('key:a.txt')).toBe('abcdef')
+  })
+
   it('formats the replace_all success message distinctly', async () => {
     const { ctx, fs } = await setup()
     const session = { header: {} }

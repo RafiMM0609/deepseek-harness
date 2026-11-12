@@ -1350,6 +1350,26 @@ pwsh 工具是 Windows 组合中 bash 执行器 seam 的 PowerShell 方言消费
     "include": {
       "type": "string",
       "description": "One glob filter for which files to search (e.g. \"*.ts\", \"*.{js,jsx}\"). Not a list; negation is not supported."
+    },
+    "glob": {
+      "type": "string",
+      "description": "Pi-compatible alias for one glob filter. Combine with include when both are needed."
+    },
+    "ignoreCase": {
+      "type": "boolean",
+      "description": "Case-insensitive search. Defaults to false."
+    },
+    "literal": {
+      "type": "boolean",
+      "description": "Treat pattern as a literal string instead of a regular expression. Defaults to false."
+    },
+    "context": {
+      "type": "number",
+      "description": "Number of lines to show before and after each match. Defaults to 0; capped at 20."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Maximum number of matches to return. Defaults to 250; capped at that value."
     }
   },
   "required": [

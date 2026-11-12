@@ -21,6 +21,8 @@ export type AgentPresetSettingsKey =
   | 'presetMinimalDescription'
   | 'presetCordisName'
   | 'presetCordisDescription'
+  | 'presetPiName'
+  | 'presetPiDescription'
   | 'inUse'
   | 'noDescription'
   | 'brokenBadge'
@@ -59,6 +61,9 @@ export const en: Record<AgentPresetSettingsKey, string> = {
   presetCordisName: 'Creator mode',
   presetCordisDescription:
     'Customize DSH through conversation. Let the agent write plugins that add features or UI, or combine tools and prompts to create your own mode.',
+  presetPiName: 'Pi mode',
+  presetPiDescription:
+    'A lean Pi-style agent: read, write, edit, bash, find, grep, AGENTS.md, skills, and compaction, without plan mode or subagents.',
 
   inUse: 'New task default',
 
@@ -100,6 +105,8 @@ export const zh: Record<AgentPresetSettingsKey, string> = {
   presetMinimalDescription: 'Agent 使用终端和图片读取工具，并支持上下文压缩，适合测试和对比其基础表现。',
   presetCordisName: '创造模式',
   presetCordisDescription: '用对话定制 DSH：让 Agent 编写插件，添加新功能或界面；也能组合工具和提示词，创建自己的模式。',
+  presetPiName: 'Pi 模式',
+  presetPiDescription: '精简的 Pi 风格 Agent：读取、写入、编辑、终端、find、grep、AGENTS.md、技能与上下文压缩，不包含计划模式或子代理。',
 
   inUse: '新任务默认',
 
@@ -145,6 +152,8 @@ export const ja = {
   'presetMinimalDescription': 'エージェントはターミナルと画像読み取りを使用し、コンテキスト圧縮にも対応します。基本的な性能のテストや比較に役立ちます。',
   'presetCordisName': 'クリエイターモード',
   'presetCordisDescription': '会話を通じて DSH をカスタマイズします。機能や UI を追加するプラグインをエージェントに書かせたり、ツールとプロンプトを組み合わせて独自のモードを作成したりできます。',
+  'presetPiName': 'Pi モード',
+  'presetPiDescription': '必要なツールだけを使う Pi 風エージェント。読み取り、書き込み、編集、ターミナル、find、grep、AGENTS.md、スキル、コンテキスト圧縮を備え、プランモードやサブエージェントは含みません。',
   'inUse': '新しいタスクの既定',
   'noDescription': '説明はありません。',
   'brokenBadge': '読み込みに失敗',
@@ -184,6 +193,9 @@ export const es = {
   presetCordisName: 'Modo creador',
   presetCordisDescription:
     'Personaliza DSH a través de la conversación. Deje que el agente escriba complementos que agreguen funciones o interfaz de usuario, o combine herramientas e indicaciones para crear su propio modo.',
+  presetPiName: 'Modo Pi',
+  presetPiDescription:
+    'Un agente ligero al estilo Pi: lectura, escritura, edición, terminal, find, grep, AGENTS.md, habilidades y compactación, sin modo de planificación ni subagentes.',
 
   inUse: 'Nueva tarea predeterminada',
 
@@ -229,6 +241,9 @@ export const fr = {
   presetCordisName: 'Mode Créateur',
   presetCordisDescription:
     "Personnalisez DSH via la conversation. Laissez l'agent écrire des plugins qui ajoutent des fonctionnalités ou une interface utilisateur, ou combinez des outils et des invites pour créer votre propre mode.",
+  presetPiName: 'Mode Pi',
+  presetPiDescription:
+    'Un agent léger inspiré de Pi : lecture, écriture, édition, terminal, find, grep, AGENTS.md, compétences et compactage, sans mode plan ni sous-agents.',
 
   inUse: 'Nouvelle tâche par défaut',
 
@@ -274,6 +289,9 @@ export const de = {
   presetCordisName: 'Erstellermodus',
   presetCordisDescription:
     'Passen Sie DSH durch Gespräche an. Lassen Sie den Agenten Plugins schreiben, die Funktionen oder Benutzeroberflächen hinzufügen, oder kombinieren Sie Tools und Eingabeaufforderungen, um Ihren eigenen Modus zu erstellen.',
+  presetPiName: 'Pi-Modus',
+  presetPiDescription:
+    'Ein schlanker Agent im Pi-Stil: Lesen, Schreiben, Bearbeiten, Terminal, find, grep, AGENTS.md, Skills und Kontextkomprimierung – ohne Planmodus oder Subagenten.',
 
   inUse: 'Neuer Aufgabenstandard',
 
@@ -319,6 +337,9 @@ export const ru = {
   presetCordisName: 'Режим автора',
   presetCordisDescription:
     'Настройте DSH через разговор. Позвольте агенту писать плагины, которые добавляют функции или пользовательский интерфейс, или комбинируйте инструменты и подсказки для создания собственного режима.',
+  presetPiName: 'Режим Pi',
+  presetPiDescription:
+    'Лёгкий агент в стиле Pi: чтение, запись, редактирование, терминал, find, grep, AGENTS.md, навыки и сжатие контекста — без режима планирования и субагентов.',
 
   inUse: 'Новая задача по умолчанию',
 
@@ -364,6 +385,9 @@ export const pt = {
   presetCordisName: 'Modo criador',
   presetCordisDescription:
     'Personalize DSH por meio de conversa. Deixe o agente escrever plug-ins que adicionem recursos ou UI, ou combine ferramentas e prompts para criar seu próprio modo.',
+  presetPiName: 'Modo Pi',
+  presetPiDescription:
+    'Um agente leve no estilo Pi: leitura, escrita, edição, terminal, find, grep, AGENTS.md, habilidades e compactação, sem modo de planejamento ou subagentes.',
 
   inUse: 'Novo padrão de tarefa',
 
