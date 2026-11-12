@@ -1,0 +1,28 @@
+# Bilingual-pair consistency record for self-hosting.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/self-hosting.md
+/self-hosting-dsh-as-a-systemd-service:
+  en: e29ca3430555761e
+  zh: 1c638991344aff8d
+/self-hosting-dsh-as-a-systemd-service/prerequisites:
+  en: 046879c7f4598467
+  zh: 428ed4e3af89435c
+/self-hosting-dsh-as-a-systemd-service/build-from-source:
+  en: d5cde1fedf09a913
+  zh: fceb2dfe0a0938b4
+/self-hosting-dsh-as-a-systemd-service/run-as-a-systemd-service:
+  en: e15d7bfcd58b0f6c
+  zh: 556dee03142ce702
+/self-hosting-dsh-as-a-systemd-service/swap-the-version-the-service-runs:
+  en: 8292b0c493356cb7
+  zh: 0c278a59d0d1f286
+/self-hosting-dsh-as-a-systemd-service/verify-the-running-version:
+  en: 709017691362ba2f
+  zh: 4264be16c939c1ee
+/self-hosting-dsh-as-a-systemd-service/roll-back:
+  en: d848de09d96b0d19
+  zh: 10555a35bece6432
+/self-hosting-dsh-as-a-systemd-service/notes:
+  en: ffd9704db674b881
+  zh: e960b790219dfb31

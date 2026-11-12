@@ -56,6 +56,10 @@ Start with the [development guide](docs/development.md) and [architecture docume
 
 `pnpm run dev:web` builds, serves, and rebuilds client bundles on source edits in one terminal, and `make help` lists the matching Make targets for Web and Desktop; the guide's application commands section owns the full table.
 
+To run a built checkout as a long-lived service and swap the version it serves, see [self-hosting](docs/self-hosting.md).
+
+To run a built checkout as a long-lived service and swap the version it serves, see [self-hosting](docs/self-hosting.md).
+
 For agents, follow [AGENTS.md](AGENTS.md).
 
 ## Citation

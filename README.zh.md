@@ -75,6 +75,10 @@ pnpm dsh web
 
 `pnpm run dev:web` 会在一个终端里完成构建、启动，并在源码修改时重建 client bundle；`make help` 列出 Web 与 Desktop 对应的 Make target。完整表格见开发指南的「应用命令」一节。
 
+若要把已构建的检出作为长期运行的服务，并切换它所提供的版本，请参阅[自托管](docs/self-hosting.zh.md)。
+
+若要把已构建的检出作为长期运行的服务，并切换它所提供的版本，请参阅[自托管](docs/self-hosting.zh.md)。
+
 面向 agent：请遵循 [AGENTS.md](AGENTS.md)。
 
 ## 引用
