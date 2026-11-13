@@ -65,6 +65,18 @@
               glob: false
               find: true
 
+          # A long `npm run typecheck` or build otherwise holds the whole step
+          # open, so the inbox cannot hand the Lead a mid-turn question until it
+          # returns. Loading this plugin attaches the job controller that
+          # `run_in_background` needs; without it that argument is rejected with
+          # JOB_CONTROLLER_UNAVAILABLE. `quiet` keeps a finished job from opening
+          # a turn on its own while the owner is idle, so the notice waits for the
+          # next real message instead of spending request tokens unasked.
+          - id: tool-jobs
+            name: '@deepseek-ai/dsh-tool-jobs'
+            config:
+              completionDelivery: quiet
+
           - id: skill-filesystem
             name: '@deepseek-ai/dsh-skill-filesystem'
             config:
