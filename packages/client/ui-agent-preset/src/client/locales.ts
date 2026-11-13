@@ -63,7 +63,7 @@ export const en: Record<AgentPresetSettingsKey, string> = {
     'Customize DSH through conversation. Let the agent write plugins that add features or UI, or combine tools and prompts to create your own mode.',
   presetPiName: 'Pi mode',
   presetPiDescription:
-    'A lean Pi-style agent: read, write, edit, bash, find, grep, AGENTS.md, skills, and compaction, without plan mode or subagents.',
+    'A lean Pi-style agent: read, write, edit, bash, find, grep, AGENTS.md, skills, compaction, and delegation through subagents and workflows, without plan mode, todo, goals, web search, or Office tools.',
 
   inUse: 'New task default',
 
@@ -106,7 +106,7 @@ export const zh: Record<AgentPresetSettingsKey, string> = {
   presetCordisName: '创造模式',
   presetCordisDescription: '用对话定制 DSH：让 Agent 编写插件，添加新功能或界面；也能组合工具和提示词，创建自己的模式。',
   presetPiName: 'Pi 模式',
-  presetPiDescription: '精简的 Pi 风格 Agent：读取、写入、编辑、终端、find、grep、AGENTS.md、技能与上下文压缩，不包含计划模式或子代理。',
+  presetPiDescription: '精简的 Pi 风格 Agent：读取、写入、编辑、终端、find、grep、AGENTS.md、技能、上下文压缩，并通过子代理与工作流委派任务；不包含计划模式、待办、目标、网页搜索或 Office 工具。',
 
   inUse: '新任务默认',
 
@@ -153,7 +153,7 @@ export const ja = {
   'presetCordisName': 'クリエイターモード',
   'presetCordisDescription': '会話を通じて DSH をカスタマイズします。機能や UI を追加するプラグインをエージェントに書かせたり、ツールとプロンプトを組み合わせて独自のモードを作成したりできます。',
   'presetPiName': 'Pi モード',
-  'presetPiDescription': '必要なツールだけを使う Pi 風エージェント。読み取り、書き込み、編集、ターミナル、find、grep、AGENTS.md、スキル、コンテキスト圧縮を備え、プランモードやサブエージェントは含みません。',
+  'presetPiDescription': '必要なツールだけを使う Pi 風エージェント。読み取り、書き込み、編集、ターミナル、find、grep、AGENTS.md、スキル、コンテキスト圧縮を備え、サブエージェントとワークフローで委譲できます。プランモード、ToDo、ゴール、ウェブ検索、Office ツールは含みません。',
   'inUse': '新しいタスクの既定',
   'noDescription': '説明はありません。',
   'brokenBadge': '読み込みに失敗',
@@ -195,7 +195,7 @@ export const es = {
     'Personaliza DSH a través de la conversación. Deje que el agente escriba complementos que agreguen funciones o interfaz de usuario, o combine herramientas e indicaciones para crear su propio modo.',
   presetPiName: 'Modo Pi',
   presetPiDescription:
-    'Un agente ligero al estilo Pi: lectura, escritura, edición, terminal, find, grep, AGENTS.md, habilidades y compactación, sin modo de planificación ni subagentes.',
+    'Un agente ligero al estilo Pi: lectura, escritura, edición, terminal, find, grep, AGENTS.md, habilidades, compactación y delegación mediante subagentes y flujos de trabajo, sin modo de planificación, tareas, metas, búsqueda web ni herramientas de Office.',
 
   inUse: 'Nueva tarea predeterminada',
 
@@ -243,7 +243,7 @@ export const fr = {
     "Personnalisez DSH via la conversation. Laissez l'agent écrire des plugins qui ajoutent des fonctionnalités ou une interface utilisateur, ou combinez des outils et des invites pour créer votre propre mode.",
   presetPiName: 'Mode Pi',
   presetPiDescription:
-    'Un agent léger inspiré de Pi : lecture, écriture, édition, terminal, find, grep, AGENTS.md, compétences et compactage, sans mode plan ni sous-agents.',
+    'Un agent léger inspiré de Pi : lecture, écriture, édition, terminal, find, grep, AGENTS.md, compétences, compactage et délégation via des sous-agents et des workflows, sans mode plan, tâches, objectifs, recherche web ni outils Office.',
 
   inUse: 'Nouvelle tâche par défaut',
 
@@ -291,7 +291,7 @@ export const de = {
     'Passen Sie DSH durch Gespräche an. Lassen Sie den Agenten Plugins schreiben, die Funktionen oder Benutzeroberflächen hinzufügen, oder kombinieren Sie Tools und Eingabeaufforderungen, um Ihren eigenen Modus zu erstellen.',
   presetPiName: 'Pi-Modus',
   presetPiDescription:
-    'Ein schlanker Agent im Pi-Stil: Lesen, Schreiben, Bearbeiten, Terminal, find, grep, AGENTS.md, Skills und Kontextkomprimierung – ohne Planmodus oder Subagenten.',
+    'Ein schlanker Agent im Pi-Stil: Lesen, Schreiben, Bearbeiten, Terminal, find, grep, AGENTS.md, Skills, Kontextkomprimierung und Delegation über Subagenten und Workflows – ohne Planmodus, ToDos, Ziele, Websuche oder Office-Tools.',
 
   inUse: 'Neuer Aufgabenstandard',
 
@@ -339,7 +339,7 @@ export const ru = {
     'Настройте DSH через разговор. Позвольте агенту писать плагины, которые добавляют функции или пользовательский интерфейс, или комбинируйте инструменты и подсказки для создания собственного режима.',
   presetPiName: 'Режим Pi',
   presetPiDescription:
-    'Лёгкий агент в стиле Pi: чтение, запись, редактирование, терминал, find, grep, AGENTS.md, навыки и сжатие контекста — без режима планирования и субагентов.',
+    'Лёгкий агент в стиле Pi: чтение, запись, редактирование, терминал, find, grep, AGENTS.md, навыки, сжатие контекста и делегирование через субагентов и рабочие процессы — без режима планирования, задач, целей, веб-поиска и инструментов Office.',
 
   inUse: 'Новая задача по умолчанию',
 
@@ -387,7 +387,7 @@ export const pt = {
     'Personalize DSH por meio de conversa. Deixe o agente escrever plug-ins que adicionem recursos ou UI, ou combine ferramentas e prompts para criar seu próprio modo.',
   presetPiName: 'Modo Pi',
   presetPiDescription:
-    'Um agente leve no estilo Pi: leitura, escrita, edição, terminal, find, grep, AGENTS.md, habilidades e compactação, sem modo de planejamento ou subagentes.',
+    'Um agente leve no estilo Pi: leitura, escrita, edição, terminal, find, grep, AGENTS.md, habilidades, compactação e delegação por subagentes e fluxos de trabalho, sem modo de planejamento, tarefas, metas, busca na web ou ferramentas Office.',
 
   inUse: 'Novo padrão de tarefa',
 

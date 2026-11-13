@@ -50,7 +50,7 @@ dsh --profile web --no-open --port 8080
 
 `minimal` agent preset 使用持久 Shell、`read_image` 工具和固定 persona，支持自动历史压缩以及会话空闲时的 `/compact` 命令。它复用 Host token meter，并拥有隔离的压缩后端。[压缩配置与保留策略](../../compaction/compaction-basic/README.zh.md#use-this-package) 沿用现有后端。图片读取复用 Host 文件系统和附件存储，要求模型支持图片输入；不加载文本读取、写入和编辑工具。
 
-`pi` agent preset 复刻 Pi 的默认 harness：读取、写入、多编辑、平台 Shell、find 与 grep，并带有 AGENTS.md、技能与压缩，不包含计划模式、子代理、待办、目标、网页搜索或 Office 工具。它在共享的 `.agents/skills` 根之外，还会加入 Pi 的项目 `.pi/skills` 根。
+`pi` agent preset 复刻 Pi 的默认 harness：读取、写入、多编辑、平台 Shell、find 与 grep，并带有 AGENTS.md、技能与压缩，不包含计划模式、待办、目标、网页搜索或 Office 工具。它在共享的 `.agents/skills` 根之外，还会加入 Pi 的项目 `.pi/skills` 根。委派是相对 Pi 原生工具列表唯一的有意增补：`subagent`、`subagent_fork` 与 `workflow` 让大型仓库无需占用 Lead 的上下文窗口即可完成勘察。
 
 `--host` 与 `--port` 配置监听器；`--tls-cert` 与 `--tls-key` 让它直接提供 HTTPS；`--public-url` 指定 GUI 在剥离前缀的代理之后对外公告的公开 HTTP(S) 根，`--trusted-host` 则添加更多被接受的 authority。这些都在[监听、信任与公开部署](#public-deployments)中说明，而这些 flag 设置的 `tls` 字段记录在[载体的配置](../../../docs/subsystems/web-server.zh.md#config)中：
 
