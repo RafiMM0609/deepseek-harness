@@ -2,10 +2,14 @@
 #
 # Pi's harness exposes read, write, multi-edit, bash, find, and grep, loads
 # AGENTS.md and skills, and compacts long histories; it ships no plan mode,
-# subagents, todo, goals, web search, or Office tools. This preset mirrors that
-# shape while using DSH's own implementations: `tool-fs` takes Pi's multi-edit
+# todo, goals, web search, or Office tools. This preset mirrors that shape
+# while using DSH's own implementations: `tool-fs` takes Pi's multi-edit
 # schema, and `tool-fs-search` enables Pi's `find` while leaving DSH's `glob`
 # off.
+#
+# Delegation is the one deliberate departure from Pi's own tool list: this
+# preset adds subagent, subagent_fork, and workflow so a large repository can
+# be inspected without consuming the Lead's context window.
 #
 # Edits saved from the Web editor override this row's `config.plugins` by id
 # from the active profile patch.
@@ -71,6 +75,42 @@
 
           - id: tool-skill
             name: '@deepseek-ai/dsh-tool-skill'
+
+          # Delegation stays out of Pi's own tool list, but without it a large
+          # repository can only be inspected inside this one context window.
+          # `subagent` and `subagent_fork` widen the search without spending the
+          # Lead's context, and `workflow` fans out over many independent pieces
+          # at once. `tool-subagent-control` supplies list_agents/send_message/
+          # wait_agent so those children stay observable; model selection lets a
+          # child run on a cheaper model than the Lead.
+          - id: delegation
+            name: cordis:group
+            group: true
+            isolate:
+              workflowEngine: true
+            config:
+              - id: tool-subagent-control
+                name: '@deepseek-ai/dsh-tool-subagent-control'
+                config:
+                  interrupt: false
+              - id: tool-subagent
+                name: '@deepseek-ai/dsh-tool-subagent'
+                config:
+                  provider: spawn
+                  toolName: subagent
+                  modelSelection: true
+                  modelDiscovery: true
+              - id: tool-subagent-fork
+                name: '@deepseek-ai/dsh-tool-subagent'
+                config:
+                  provider: fork
+                  toolName: subagent_fork
+              - id: workflow-ptc
+                name: '@deepseek-ai/dsh-workflow-ptc'
+                config:
+                  provider: spawn
+              - id: tool-workflow
+                name: '@deepseek-ai/dsh-tool-workflow'
 
           - id: compaction
             name: cordis:group

@@ -3,4 +3,4 @@
   - menuitem "PTC mode Includes all Standard mode capabilities. Better suited to tasks that call tools in batches and then filter, organize, deduplicate, count, or summarize the results."
   - menuitem "Minimal mode The agent uses a terminal and image reading, with context compaction. Useful for testing and comparing its basic performance."
   - menuitem "Creator mode Customize DSH through conversation. Let the agent write plugins that add features or UI, or combine tools and prompts to create your own mode."
-  - menuitem "Pi mode A lean Pi-style agent: read, write, edit, bash, find, grep, AGENTS.md, skills, and compaction, without plan mode or subagents."
+  - menuitem "Pi mode A lean Pi-style agent: read, write, edit, bash, find, grep, AGENTS.md, skills, compaction, and delegation through subagents and workflows, without plan mode, todo, goals, web search, or Office tools."
