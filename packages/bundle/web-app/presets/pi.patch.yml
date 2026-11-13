@@ -8,8 +8,9 @@
 # off.
 #
 # Delegation is the one deliberate departure from Pi's own tool list: this
-# preset adds subagent, subagent_fork, and workflow so a large repository can
-# be inspected without consuming the Lead's context window.
+# preset adds subagent and workflow so a large repository can be inspected
+# without consuming the Lead's context window. Fork is excluded because it
+# duplicates the parent's completed turns into the child.
 #
 # Edits saved from the Web editor override this row's `config.plugins` by id
 # from the active profile patch.
@@ -78,11 +79,16 @@
 
           # Delegation stays out of Pi's own tool list, but without it a large
           # repository can only be inspected inside this one context window.
-          # `subagent` and `subagent_fork` widen the search without spending the
-          # Lead's context, and `workflow` fans out over many independent pieces
-          # at once. `tool-subagent-control` supplies list_agents/send_message/
-          # wait_agent so those children stay observable; model selection lets a
-          # child run on a cheaper model than the Lead.
+          # `subagent` widens the search without spending the Lead's context, and
+          # `workflow` fans out over many independent pieces at once.
+          # `tool-subagent-control` supplies list_agents/send_message/wait_agent so
+          # those children stay observable; model selection lets a child run on a
+          # cheaper model than the Lead.
+          #
+          # Fork is deliberately absent: it seeds the child with the parent's
+          # completed-turn prefix, which duplicates history into a second context
+          # instead of keeping work out of this one. Spawn starts the child clean,
+          # so it is the delegation that lowers cost per task.
           - id: delegation
             name: cordis:group
             group: true
@@ -100,11 +106,6 @@
                   toolName: subagent
                   modelSelection: true
                   modelDiscovery: true
-              - id: tool-subagent-fork
-                name: '@deepseek-ai/dsh-tool-subagent'
-                config:
-                  provider: fork
-                  toolName: subagent_fork
               - id: workflow-ptc
                 name: '@deepseek-ai/dsh-workflow-ptc'
                 config:
