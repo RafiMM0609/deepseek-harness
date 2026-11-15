@@ -11,6 +11,7 @@ const limits: HttpFetchLimits = {
   timeoutMs: 5_000,
   maxRedirects: 5,
   userAgent: 'test-agent/1.0',
+  allowPrivateAddresses: true,
 }
 
 /** Absolute-form targets the fake proxy saw; a populated entry proves the hop was tunnelled. */

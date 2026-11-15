@@ -40,18 +40,67 @@ export function parseFetchUrl(input: string): URL {
 }
 
 /**
+ * Test whether a normalized hostname represents a loopback, link-local,
+ * cloud metadata, carrier-grade NAT, or RFC 1918 private network destination.
+ *
+ * @param hostname - normalized hostname from a WHATWG `URL`.
+ * @returns true if the hostname is private or local.
+ */
+export function isPrivateOrLocalHost(hostname: string): boolean {
+  const host = (hostname.startsWith('[') && hostname.endsWith(']'))
+    ? hostname.slice(1, -1).toLowerCase()
+    : hostname.toLowerCase()
+
+  if (
+    host === 'localhost'
+    || host.endsWith('.localhost')
+    || host.endsWith('.local')
+    || host === 'metadata.google.internal'
+    || host === 'instance-data'
+  ) {
+    return true
+  }
+
+  if (
+    host === '::1'
+    || host === '::'
+    || host.startsWith('fe80:')
+    || host.startsWith('fc00:')
+    || host.startsWith('fd')
+  ) {
+    return true
+  }
+
+  const parts = host.split('.')
+  if (parts.length === 4 && parts.every(p => /^\d+$/.test(p))) {
+    const [b0, b1] = parts.map(Number) as [number, number, number, number]
+    if (b0 === 0 || b0 === 127 || b0 === 10) return true
+    if (b0 === 172 && b1 >= 16 && b1 <= 31) return true
+    if (b0 === 192 && b1 === 168) return true
+    if (b0 === 169 && b1 === 254) return true
+    if (b0 === 100 && b1 >= 64 && b1 <= 127) return true
+  }
+
+  return false
+}
+
+/**
  * Validate a request URL against the provider's complete pre-network policy:
- * bounded length plus the restrictions enforced by {@link parseFetchUrl}.
- * Public-address resolution and connection pinning run after this check.
+ * bounded length, credentials, scheme, and private network restrictions.
  *
  * @param input - the raw URL string from the fetch request.
+ * @param allowPrivate - whether loopback and private-network destinations are permitted.
  * @returns the parsed `URL`.
  */
-export function validateFetchUrl(input: string): URL {
+export function validateFetchUrl(input: string, allowPrivate: boolean = false): URL {
   if (input.length > WEB_FETCH_MAX_URL_LENGTH) {
     throw new WebError(`URL exceeds the maximum length of ${WEB_FETCH_MAX_URL_LENGTH}`, 'WEB_INVALID_URL')
   }
-  return parseFetchUrl(input)
+  const url = parseFetchUrl(input)
+  if (!allowPrivate && isPrivateOrLocalHost(url.hostname)) {
+    throw new WebError(`fetching private or local destination "${url.hostname}" is blocked`, 'WEB_BLOCKED_URL')
+  }
+  return url
 }
 
 /**

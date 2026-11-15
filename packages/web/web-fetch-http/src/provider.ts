@@ -25,6 +25,8 @@ export interface HttpFetchLimits {
   maxRedirects: number
   /** `User-Agent` header sent on every request. */
   userAgent: string
+  /** Whether requests to loopback and private networks are permitted. Defaults to false. */
+  allowPrivateAddresses?: boolean
 }
 
 /** Stable id this provider registers under. */
@@ -35,14 +37,14 @@ export class HttpFetchProvider implements WebFetchProvider {
   readonly id = LOCAL_FETCH_PROVIDER_ID
   /** Picker description: what this provider suits and what it costs or cannot do. */
   readonly description: NonNullable<WebFetchProvider['description']> = {
-    en: 'Free, and can reach intranet and local addresses. Does not support pages that need JavaScript or sign-in, or PDFs.',
-    zh: '免费，可访问内网和本机。不支持需要 JavaScript 或登录的页面，也不支持 PDF。',
-    ja: '無料で、イントラネットやローカルのアドレスにもアクセスできます。JavaScript やログインが必要なページ、PDF には対応しません。',
-    es: 'Gratis y puede acceder a direcciones de la intranet y locales. No admite páginas que requieran JavaScript o inicio de sesión, ni PDF.',
-    fr: 'Gratuit, et accède aux adresses intranet et locales. Ne prend pas en charge les pages nécessitant JavaScript ou une connexion, ni les PDF.',
-    de: 'Kostenlos und erreicht auch Intranet- und lokale Adressen. Keine Seiten, die JavaScript oder eine Anmeldung erfordern, und keine PDFs.',
-    ru: 'Бесплатно, доступны адреса интрасети и локальные адреса. Не поддерживает страницы, требующие JavaScript или входа, а также PDF.',
-    pt: 'Gratuito e acessa endereços da intranet e locais. Não oferece suporte a páginas que exigem JavaScript ou login, nem a PDFs.',
+    en: 'Free anonymous web fetch. Does not support pages that need JavaScript or sign-in, or PDFs.',
+    zh: '免费匿名网络抓取。不支持需要 JavaScript 或登录的页面，也不支持 PDF。',
+    ja: '無料の匿名 Web 取得。JavaScript やログインが必要なページ、PDF には対応しません。',
+    es: 'Extracción web anónima y gratuita. No admite páginas que requieran JavaScript o inicio de sesión, ni PDF.',
+    fr: 'Extraction web anonyme et gratuite. Ne prend pas en charge les pages nécessitant JavaScript ou une connexion, ni les PDF.',
+    de: 'Kostenlose anonyme Web-Abfrage. Keine Seiten, die JavaScript oder eine Anmeldung erfordern, und keine PDFs.',
+    ru: 'Бесплатное анонимное получение веб-страниц. Не поддерживает страницы, требующие JavaScript или входа, а также PDF.',
+    pt: 'Extração anônima e gratuita da Web. Não oferece suporte a páginas que exigem JavaScript ou login, nem a PDFs.',
   }
 
   /** @param limits - resolved transport and response limits. */
@@ -64,7 +66,8 @@ export class HttpFetchProvider implements WebFetchProvider {
 
   /** Follow same-origin redirects up to the hop cap, then read the final response. */
   private async followAndRead(initialUrl: string, signal: AbortSignal): Promise<WebFetchResult> {
-    let currentUrl = validateFetchUrl(initialUrl)
+    const allowPrivate = this.limits.allowPrivateAddresses ?? false
+    let currentUrl = validateFetchUrl(initialUrl, allowPrivate)
     let redirectsFollowed = 0
 
     for (;;) {
@@ -88,7 +91,7 @@ export class HttpFetchProvider implements WebFetchProvider {
         // that validateFetchUrl would reject.
         let validatedTarget: URL
         try {
-          validatedTarget = validateFetchUrl(target.toString())
+          validatedTarget = validateFetchUrl(target.toString(), allowPrivate)
           if (!isSameOrigin(validatedTarget, currentUrl)) {
             throw new WebError(
               `cross-origin redirect to ${validatedTarget.origin} is not followed automatically; retry against that URL directly`,

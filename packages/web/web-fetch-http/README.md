@@ -47,6 +47,7 @@ Load the web service and the provider; configurable limits have safe defaults an
 | `timeoutMs` | `30,000` | Fetch timeout — a resource backstop, not the model-facing tool budget |
 | `maxRedirects` | `5` | Maximum same-origin redirect hops (`0` follows none) |
 | `userAgent` | `deepseek-harness/…` | `User-Agent` header sent on every request |
+| `allowPrivateAddresses` | `false` | Whether to allow fetching loopback, private-network, and cloud metadata addresses |
 
 The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-web-fetch-http) is the exhaustive source for every accepted field and its JSDoc.
 
@@ -133,7 +134,7 @@ No direct invalidation; the named consumer owns any request-prefix changes.
 
 These limits define when the provider is unsafe or a poor fit. They are current package constraints.
 
-- **Private destinations are reachable** — loopback, private-network, and cloud metadata addresses are fetched like any other host. A deployment that must keep the model away from them needs a `tools/pre-execute` policy, network confinement, or no fetch tool.
+- **Private destinations are blocked by default** — loopback, private-network, and cloud metadata addresses are rejected unless `allowPrivateAddresses: true` is configured.
 - **Only textual content decodes** — html/xhtml and `text/*` plus JSON/XML families; a missing `Content-Type` or any binary type throws `WEB_UNSUPPORTED_CONTENT_TYPE`, and text-extractable PDF decoding is named deferred work.
 - **Charset comes only from the `Content-Type` header** (UTF-8 default) — an HTML `<meta charset>` declaration is ignored, and unsupported declarations without a UTF-8 label throw.
 - **UTF-8 recovery is a preference, not encoding detection** — bytes can be valid as both UTF-8 and another encoding, even in a long response. Recovery chooses UTF-8 in that case; malformed declarations without a UTF-8 label remain unsupported.

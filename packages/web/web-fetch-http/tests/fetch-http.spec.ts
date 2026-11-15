@@ -22,6 +22,7 @@ const limits: HttpFetchLimits = {
   timeoutMs: 5_000,
   maxRedirects: 5,
   userAgent: 'test-agent/1.0',
+  allowPrivateAddresses: true,
 }
 
 type Handler = (req: IncomingMessage, res: ServerResponse) => void
@@ -59,6 +60,17 @@ describe('policy helpers', () => {
     const exact = `${prefix}${'a'.repeat(WEB_FETCH_MAX_URL_LENGTH - prefix.length)}`
     expect(validateFetchUrl(exact).href).toBe(exact)
     expect(() => validateFetchUrl(`${exact}a`)).toThrow(expect.objectContaining({ code: 'WEB_INVALID_URL' }))
+  })
+
+  it('blocks private, loopback, and metadata destinations by default', () => {
+    expect(() => validateFetchUrl('http://127.0.0.1')).toThrow(expect.objectContaining({ code: 'WEB_BLOCKED_URL' }))
+    expect(() => validateFetchUrl('http://localhost:8080')).toThrow(expect.objectContaining({ code: 'WEB_BLOCKED_URL' }))
+    expect(() => validateFetchUrl('http://169.254.169.254/latest/meta-data')).toThrow(expect.objectContaining({ code: 'WEB_BLOCKED_URL' }))
+    expect(() => validateFetchUrl('http://192.168.1.1')).toThrow(expect.objectContaining({ code: 'WEB_BLOCKED_URL' }))
+    expect(() => validateFetchUrl('http://10.0.0.1')).toThrow(expect.objectContaining({ code: 'WEB_BLOCKED_URL' }))
+    expect(() => validateFetchUrl('http://172.16.0.1')).toThrow(expect.objectContaining({ code: 'WEB_BLOCKED_URL' }))
+    expect(() => validateFetchUrl('http://[::1]')).toThrow(expect.objectContaining({ code: 'WEB_BLOCKED_URL' }))
+    expect(validateFetchUrl('http://127.0.0.1', true).hostname).toBe('127.0.0.1')
   })
 
   it('classifies content types', () => {
@@ -506,12 +518,21 @@ describe('web-fetch-http plugin registration', () => {
   it('registers the provider into ctx.web (HMR-safe)', async () => {
     const ctx = new Context()
     await ctx.plugin(WebRuntime, { fetchProvider: LOCAL_FETCH_PROVIDER_ID })
-    const fiber = await ctx.plugin(fetchPlugin, {})
+    const fiber = await ctx.plugin(fetchPlugin, { allowPrivateAddresses: true })
     await expect(ctx.web.fetch({ url: `${base}/` }))
       .resolves.toMatchObject({ statusCode: 200 })
     await fiber.dispose()
     await expect(ctx.web.fetch({ url: `${base}/` }))
       .rejects.toThrow(expect.objectContaining({ code: 'WEB_PROVIDER_CONFIGURED_MISSING' }))
+  })
+
+  it('blocks private addresses by default when loaded as a plugin', async () => {
+    const ctx = new Context()
+    await ctx.plugin(WebRuntime, { fetchProvider: LOCAL_FETCH_PROVIDER_ID })
+    const fiber = await ctx.plugin(fetchPlugin, {})
+    await expect(ctx.web.fetch({ url: `${base}/` }))
+      .rejects.toMatchObject({ code: 'WEB_BLOCKED_URL' })
+    await fiber.dispose()
   })
 
   it('has no default export (namespace plugin export shape)', () => {
@@ -556,7 +577,7 @@ describe('web-fetch-http plugin registration', () => {
   it('accepts maxRedirects: 0 (follow no redirects) as valid config', async () => {
     const ctx = new Context()
     await ctx.plugin(WebRuntime, { fetchProvider: LOCAL_FETCH_PROVIDER_ID })
-    const fiber = await ctx.plugin(fetchPlugin, { maxRedirects: 0 })
+    const fiber = await ctx.plugin(fetchPlugin, { maxRedirects: 0, allowPrivateAddresses: true })
     await expect(ctx.web.fetch({ url: `${base}/` }))
       .resolves.toMatchObject({ statusCode: 200 })
     await fiber.dispose()
