@@ -2,14 +2,14 @@
 #
 # Pi's harness exposes read, write, multi-edit, bash, find, and grep, loads
 # AGENTS.md and skills, and compacts long histories; it ships no plan mode,
-# todo, goals, web search, or Office tools. This preset mirrors that shape
+# todo, goals, or Office tools. This preset mirrors that shape
 # while using DSH's own implementations: `tool-fs` takes Pi's multi-edit
 # schema, and `tool-fs-search` enables Pi's `find` while leaving DSH's `glob`
 # off.
 #
-# Delegation is the one deliberate departure from Pi's own tool list: this
-# preset adds subagent and workflow so a large repository can be inspected
-# without consuming the Lead's context window. Fork is excluded because it
+# Delegation and web search are deliberate departures from Pi's own tool list:
+# this preset adds subagent, workflow, and web search so a large repository can
+# be inspected and web resources fetched without consuming the Lead's context window. Fork is excluded because it
 # duplicates the parent's completed turns into the child.
 #
 # Edits saved from the Web editor override this row's `config.plugins` by id
@@ -26,7 +26,8 @@
             config:
               prefix: >-
                 You are a coding assistant running inside pi, a coding agent
-                harness. Help users inspect files, run commands, and modify code.
+                harness. Help users inspect files, run commands, modify code,
+                and search the web.
               suffix: >-
                 Be concise in your responses.
                 Show file paths clearly when working with files.
@@ -64,6 +65,12 @@
               sampleOverCapGlobResults: false
               glob: false
               find: true
+
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
 
           # A long `npm run typecheck` or build otherwise holds the whole step
           # open, so the inbox cannot hand the Lead a mid-turn question until it

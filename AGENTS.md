@@ -1,5 +1,17 @@
 # AGENTS.md
 
+> [!CAUTION]
+> **CRITICAL ENVIRONMENT CONSTRAINT — DO NOT RUN FULL BUILDS OR AGGREGATE CHECKS ON THIS HOST!**
+> This host is a small VPS with only **2 GB RAM**. The aggregate build and typecheck processes in this repository (`pnpm run build`, `pnpm run build:check`, `pnpm run build:artifacts`, `pnpm run typecheck`) spawn concurrent TypeScript compiler (`tsc`) workers with `--max-old-space-size=8192` peaking over **5.3 GiB RSS**.
+> Running these commands on this host **will completely exhaust RAM and Swap, lock the system in an I/O thrashing deadlock, and crash/freeze the entire server**.
+> - **FORBIDDEN COMMANDS on this machine:**
+>   - `pnpm run build`
+>   - `pnpm run build:check`
+>   - `pnpm run build:artifacts`
+>   - `pnpm run typecheck`
+>   - Full test suite runs (`pnpm test` or `pnpm run test:coverage` without a single file target)
+> - **ALLOWED:** Run only single, targeted Vitest files (e.g. `pnpm vitest run path/to/target.spec.ts`) or fast linters (`pnpm run lint:contracts-ready`, `oxlint`). Leave aggregate typechecks, builds, and full suites to CI!
+
 DeepSeek Harness is an all-plugin Cordis agent harness. Read [docs/architecture.md](docs/architecture.md) before changing `packages/`; follow [docs/AGENTS.md](docs/AGENTS.md) for documentation.
 
 ## Pre-stable APIs and released Session data
@@ -85,18 +97,18 @@ Package groups: [packages/README.md](packages/README.md). [Experimental status](
 ```sh
 pnpm install            # pnpm workspaces, node >=24.9
 pnpm run clean           # remove build outputs and safe residue from deleted packages
-pnpm run test           # unit tests
-pnpm run test:coverage  # CI coverage gate: per-file 100% on packages/*/*/src
+pnpm run test           # unit tests (DO NOT run whole suite; run specific files only)
+pnpm run test:coverage  # CI coverage gate: per-file 100% on packages/*/*/src (CI only)
 pnpm run test:e2e       # real-API tests; self-skip without DEEPSEEK_API_KEY
 pnpm run test:expected  # owner-local process expectations
 pnpm run test:snapshot  # keyless recorded-session replay through shipped profiles; filter: -t <name>
 pnpm run test:snapshot:record  # re-record expected outputs (needs key)
-pnpm run typecheck
+pnpm run typecheck      # [DO NOT RUN LOCALLY: RAM > 5GB]
 pnpm run lint
 pnpm run duplication    # cross-file TypeScript clone detection
-pnpm run build          # build:artifacts + build:check, concurrently
-pnpm run build:artifacts # artifacts: tsc emits lib/types, tsdown bundles runtime, Web
-pnpm run build:check    # typecheck aggregate tests/scripts against current build:artifacts output
+pnpm run build          # [DO NOT RUN LOCALLY: RAM > 7GB, crashes server]
+pnpm run build:artifacts # [DO NOT RUN LOCALLY: RAM > 5GB]
+pnpm run build:check    # [DO NOT RUN LOCALLY: RAM > 5GB, crashes server]
 pnpm run hygiene        # publint + workspace/package/dependency checks + NodeNext consumer check
 pnpm run check:windows-wine  # ONLY when diagnosing a known Windows failure (needs wine); CI owns this signal
 pnpm run doc-sync       # documentation gates (scripts/run-gates.ts)
@@ -119,7 +131,7 @@ Before pushing, follow [dsh-pre-push-checks](.agents/skills/dsh-pre-push-checks/
 - Match evidence to the surface: focused behavior tests, model/user-output snapshots, `doc-sync` for docs, built smokes for published paths, and real-API e2e for providers.
 - Never default to the full suite or repeat a passing check for commit or push. CI owns exhaustive coverage and the platform matrix; rehearse all locally only by explicit request, for CI diagnosis, or for an irreducibly repository-wide change.
 - `test:coverage`, not `test`, is the CI coverage gate ([why](docs/testing.md)).
-- Develop with `build:artifacts`; before claiming completion, run `build:check` after the latest `build:artifacts`, or `build` ([layout](docs/development.md#typescript-project-layout)).
+- **DO NOT run `build:check`, `build:artifacts`, `build`, or `typecheck` on this host.** The host has only 2GB RAM; these commands will freeze/hang the VPS. Use CI for complete validation or run targeted unit tests on individual files only (`pnpm vitest run <file>`).
 - **Web browser automation and GIF recording:** launch with `pnpm dsh web --patch apps/web/tests/pin-browse-picker.overlay.yml` to use the [in-page directory picker](apps/web/tests/pin-browse-picker.overlay.yml); omit this override only when testing native picker behavior explicitly.
 
 ## Secrets / .env
@@ -161,6 +173,7 @@ Real-API tests/demos read `DEEPSEEK_API_KEY`, optional `DEEPSEEK_BASE_URL`, and 
 - **UI changes:** use [dsh-client-ui-ux](.agents/skills/dsh-client-ui-ux/SKILL.md) as the design and review entry point; load its references only as needed.
 - **Testing policy** — [docs/testing.md](docs/testing.md). Every non-trivial model- or product-user-visible change updates a keyless recorded-session snapshot; [snapshot ownership](snapshots/AGENTS.md) reserves the top-level tree for session-driven cases and keeps other expected output owner-local. Fixtures replay on macOS/Linux; fix fixtures, not normalizers.
 - **Design each tool's UI presentation up front.** Host presenters stay pure; Web cards derive from raw events and persisted result metadata ([cookbook](docs/cookbook/adding-a-tool.md)).
+- **Tool execution and runtime inspection:** Always run `cordis_inspect_list` to discover valid platforms, providers, and exact method schemas before calling `cordis_inspect_query`; never guess provider or method names. When authoring or installing plugins, verify that the active preset or profile patch declares the new tools before executing them.
 - **Plan unit, e2e, and snapshot coverage** for capability seams, lifecycle paths, and transcript output; include missing snapshot-harness support in the same change.
 - **Both SDKs project the loop.** Agent-loop, session-lifecycle, and `SessionEventMap` changes update the TypeScript and Python SDK expected outputs in the same PR; `pnpm run test` covers neither ([surfaces](docs/testing.md#when-a-snapshot-test-is-required)).
 - **Choose PR history deliberately.** Split independent changes and fix the introducing PR before propagation. Standalone/stack branches may merge-forward or rebase. Rewrites use `--force-with-lease`, abort on remote movement, never raw `--force`; preserve an in-progress merge-forward checkpoint before taking a newer base ([rationale](.agents/notes/implemented/process/2026-08-02-native-github-stacks-and-optional-rebases.md)).
