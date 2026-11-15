@@ -43,7 +43,8 @@ pre-merge-commit:
       glob: '.agents/notes/archived/**'
       run: node_modules/.bin/tsx scripts/verify-archived-agent-notes.ts
 
-pre-push:
-  jobs:
-    - name: typecheck
-      run: pnpm run typecheck
+# pre-push:
+#   jobs:
+#     - name: typecheck
+#       # Disabled locally on 2GB RAM VPS to prevent OOM freeze; typecheck runs in CI.
+#       run: pnpm run typecheck
