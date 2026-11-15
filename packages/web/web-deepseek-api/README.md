@@ -42,7 +42,7 @@ Mount the plugin alongside `dsh-web` and [`dsh-deepseek-auth`](../../account/dee
 |---|---|---|
 | `count` | `10` | Search API results per search, an integer from 1 to 50; a smaller `maxResults` on the request wins |
 | `searchRequestsPerSecond` | `5` | Most Search requests this plugin instance sends in any one-second window, matching the service's account-wide 5 QPS limit; later searches wait, and the wait counts against the caller's timeout |
-| `sendOriginalQuestion` | `true` | Send the triggering human prompt, cut to 128 characters, as the Search API's `ori_question` |
+| `sendOriginalQuestion` | `false` | Send the triggering human prompt, cut to 128 characters, as the Search API's `ori_question` |
 | `searchBilling` | `auto` | Credential Search sends without own settings: `auto`, `account`, or `api-key` ([authentication](#authentication)) |
 | `fetchBilling` | `auto` | Credential Fetch sends without own settings, with the same values |
 | `searchBaseURL` | omitted | Search API base including its path prefix; `/search` is appended. Set alone, `searchApiKeyEnv` defaults to `DEEPSEEK_API_KEY` ([authentication](#authentication)) |

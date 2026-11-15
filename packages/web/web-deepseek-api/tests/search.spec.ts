@@ -236,12 +236,12 @@ describe('Search API triggering question', () => {
     } finally { await ctx.fiber.dispose() }
   }
 
-  it('sends the latest human prompt as ori_question', async () => {
-    expect(await searchFromPrompt()).toMatchObject({ ori_question: 'What changed in DeepSeek V4?' })
+  it('sends the latest human prompt as ori_question when enabled', async () => {
+    expect(await searchFromPrompt({ sendOriginalQuestion: true })).toMatchObject({ ori_question: 'What changed in DeepSeek V4?' })
   })
 
-  it('omits ori_question when sending it is disabled', async () => {
-    expect(await searchFromPrompt({ sendOriginalQuestion: false })).not.toHaveProperty('ori_question')
+  it('omits ori_question by default', async () => {
+    expect(await searchFromPrompt()).not.toHaveProperty('ori_question')
   })
 })
 

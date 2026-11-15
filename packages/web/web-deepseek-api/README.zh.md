@@ -42,7 +42,7 @@ kind: "package-reference"
 |---|---|---|
 | `count` | `10` | Search API 每次搜索的结果数，为 1 至 50 的整数；请求中更小的 `maxResults` 优先 |
 | `searchRequestsPerSecond` | `5` | 本插件实例在任意一秒窗口内最多发送的 Search 请求数，与服务的账号级 5 QPS 限制一致；后续搜索排队等待，等待时间计入调用方的超时 |
-| `sendOriginalQuestion` | `true` | 将触发搜索的用户提示截取至 128 个字符，作为 Search API 的 `ori_question` 发送 |
+| `sendOriginalQuestion` | `false` | 将触发搜索的用户提示截取至 128 个字符，作为 Search API 的 `ori_question` 发送 |
 | `searchBilling` | `auto` | 没有单独配置时 Search 发送的凭据：`auto`、`account` 或 `api-key`（[鉴权](#authentication)） |
 | `fetchBilling` | `auto` | 没有单独配置时 Fetch 发送的凭据，取值相同 |
 | `searchBaseURL` | 省略 | Search API 基础地址，包含路径前缀；追加 `/search`。只设置此项时，`searchApiKeyEnv` 默认为 `DEEPSEEK_API_KEY`（[鉴权](#authentication)） |

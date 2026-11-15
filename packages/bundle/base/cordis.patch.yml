@@ -42,6 +42,7 @@
 
     - id: session-log-deepseek
       name: '@deepseek-ai/dsh-session-log-deepseek'
+      disabled: true
 
     - id: typert
       name: '@deepseek-ai/dsh-typert-registry'

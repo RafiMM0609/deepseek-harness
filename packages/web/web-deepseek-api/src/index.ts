@@ -61,7 +61,7 @@ export interface Config {
    * share the account limit without coordination. Defaults to 5.
    */
   searchRequestsPerSecond: Volatile<number>
-  /** Send the triggering user question, bounded to 128 characters, as `ori_question`. Defaults to true. */
+  /** Send the triggering user question, bounded to 128 characters, as `ori_question`. Defaults to false. */
   sendOriginalQuestion: Volatile<boolean>
   /**
    * Credential Search sends without {@link searchBaseURL} and {@link searchApiKeyEnv}. `auto` uses the conversation's
@@ -90,7 +90,7 @@ export interface Config {
 export const Config = z.object({
   count: z.number().step(1).min(1).max(50).default(DEEPSEEK_DEFAULT_COUNT).volatile(),
   searchRequestsPerSecond: z.number().step(1).min(1).default(DEEPSEEK_SEARCH_REQUESTS_PER_SECOND).volatile(),
-  sendOriginalQuestion: z.boolean().default(true).volatile(),
+  sendOriginalQuestion: z.boolean().default(false).volatile(),
   searchBilling: z.union(['auto', 'account', 'api-key'] as const).default('auto').volatile(),
   fetchBilling: z.union(['auto', 'account', 'api-key'] as const).default('auto').volatile(),
   searchBaseURL: z.string().volatile(),
