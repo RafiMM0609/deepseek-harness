@@ -31,6 +31,7 @@
               suffix: >-
                 Be concise in your responses.
                 Show file paths clearly when working with files.
+                Stop condition: Once your test or targeted verification passes cleanly, you MUST immediately output your final summary to the user. Do NOT run redundant re-verifications or extra git status checks.
 
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
